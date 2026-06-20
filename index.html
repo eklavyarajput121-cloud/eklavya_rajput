@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paddle Pop Game</title>
+    <style>
+        body { 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: #1a1a1a; 
+            color: white; 
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        canvas { 
+            border: 4px solid #00d4ff; 
+            background: #000; 
+            box-shadow: 0 0 20px #00d4ff;
+            cursor: none; /* Mouse cursor chhupa diya taaki game feel aaye */
+        }
+        .ui { position: absolute; top: 20px; text-align: center; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="ui">
+        <h1>Paddle Game</h1>
+        <p>Mouse move karein aur ball ko girne se bachayein!</p>
+    </div>
+
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Game Variables
+        let score = 0;
+        let lives = 3;
+
+        // Ball ki settings
+        let x = canvas.width / 2;
+        let y = canvas.height - 30;
+        let dx = 3;  // Ball ki X speed
+        let dy = -3; // Ball ki Y speed
+        const ballRadius = 10;
+
+        // Paddle ki settings
+        const paddleHeight = 15;
+        const paddleWidth = 100;
+        let paddleX = (canvas.width - paddleWidth) / 2;
+
+        // Mouse move hone par paddle ki position badalna
+        document.addEventListener("mousemove", mouseMoveHandler, false);
+
+        function mouseMoveHandler(e) {
+            let relativeX = e.clientX - canvas.offsetLeft;
+            if(relativeX > 0 && relativeX < canvas.width) {
+                paddleX = relativeX - paddleWidth / 2;
+            }
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#00d4ff";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#00d4ff";
+            ctx.fillText("Score: " + score, 8, 20);
+        }
+
+        function draw() {
+            // Screen saaf karna
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawBall();
+            drawPaddle();
+            drawScore();
+
+            // Ball ka deewaron se takrana (Left aur Right)
+            if(x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+                dx = -dx;
+            }
+
+            // Ball ka upar ki deewar se takrana
+            if(y + dy < ballRadius) {
+                dy = -dy;
+            } 
+            // Ball ka neeche ki taraf jaana
+            else if(y + dy > canvas.height - ballRadius - 10) {
+                // Agar ball paddle se takraye
+                if(x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                    score++;
+                    // Har baar score badhne par speed thodi badhayein
+                    dx *= 1.05; 
+                    dy *= 1.05;
+                } 
+                else {
+                    // Game Over
+                    alert("GAME OVER! Aapka Score: " + score);
+                    document.location.reload();
+                }
+            }
+
+            x += dx;
+            y += dy;
+
+            requestAnimationFrame(draw); // Game ko smooth chalane ke liye loop
+        }
+
+        draw(); // Game start karein
+    </script>
+</body>
+</html>
+
